@@ -9,9 +9,9 @@ namespace myclinic_back.Utilities
         {
             var spec = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == idSpec);
 
-            if (spec != null)
+            if (spec == null)
             {
-                return "";
+                return null;
             }
 
             return spec.Name;

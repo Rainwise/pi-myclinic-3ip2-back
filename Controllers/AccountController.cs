@@ -17,14 +17,14 @@ namespace myclinic_back.Controllers
         private readonly PiProjectContext _context;
         private readonly IConfiguration _configuration;
 
-        private AccountController(PiProjectContext context, IConfiguration configuration)
+        public AccountController(PiProjectContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
         }
 
-        [HttpGet("[action]/{idUser}")]
-        [Authorize]
+        [HttpGet("[action]/{idAccount}")]
+        //[Authorize]
         public ActionResult GetAccountById(int idAccount)
         {
             try
@@ -43,8 +43,12 @@ namespace myclinic_back.Controllers
                     LastName = account.LastName,
                     EmailAddres = account.EmailAddress,
                     Role = account.Role.Name,
-                    Specialization = GetSpecForAccount.getSpecForAccount(account.Doctor.SpecializationId)
                 };
+
+                if (account.Role.Name == "Doctor")
+                {
+                    dto.Specialization = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == account.Doctor.SpecializationId).Name;
+                }
 
                 if (account == null)
                 {
@@ -60,7 +64,7 @@ namespace myclinic_back.Controllers
         }
 
         [HttpGet("[action]")]
-        [Authorize]
+        //[Authorize]
         public ActionResult GetDoctorAccounts()
         {
             try
@@ -82,8 +86,12 @@ namespace myclinic_back.Controllers
                         LastName = d.LastName,
                         EmailAddres = d.EmailAddress,
                         Role = d.Role.Name,
-                        Specialization = GetSpecForAccount.getSpecForAccount(d.Doctor.SpecializationId)
                     };
+
+                    if (d.Role.Name == "Doctor")
+                    {
+                        dto.Specialization = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == d.Doctor.SpecializationId).Name;
+                    }
 
                     dtos.Add(dto);
                 }
@@ -97,7 +105,7 @@ namespace myclinic_back.Controllers
         }
 
         [HttpGet("[action]")]
-        [Authorize]
+        //[Authorize]
         public ActionResult GetPatientAccounts()
         {
             try
@@ -134,7 +142,7 @@ namespace myclinic_back.Controllers
 
 
         [HttpGet("[action]")]
-        [Authorize]
+        //[Authorize]
         public ActionResult GetAccounts()
         {
             try
@@ -157,12 +165,16 @@ namespace myclinic_back.Controllers
                         LastName = p.LastName,
                         EmailAddres = p.EmailAddress,
                         Role = p.Role.Name,
-                        Specialization = GetSpecForAccount.getSpecForAccount(p.Doctor.SpecializationId)
                     };
 
                     dtos.Add(dto);
-                }
 
+                    if (p.Role.Name == "Doctor")
+                    {
+                        dto.Specialization = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == p.Doctor.SpecializationId).Name;
+                    }
+                }
+                
                 return Ok(dtos);
 
             }
@@ -174,7 +186,7 @@ namespace myclinic_back.Controllers
 
         [HttpPost("[action]")]
         [AllowAnonymous]
-        public ActionResult CreateAccount(CreatePatientDto dto)
+        public ActionResult CreateAccount(CreateAccountDto dto)
         {
             try
             {
@@ -203,7 +215,7 @@ namespace myclinic_back.Controllers
                     var doctor = new Doctor()
                     {
                         AccountId = account.IdAccount,
-                        SpecializationId = 1
+                        SpecializationId = dto.SpecializationId
                     };
 
                     _context.Add(doctor);
@@ -246,7 +258,7 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPut("[action]/{idAccount}")]
-        [Authorize]
+        //[Authorize]
         public ActionResult UpdateAccount(int idAccount, UpdateAccountDto dto)
         {
             try
@@ -267,7 +279,7 @@ namespace myclinic_back.Controllers
                 _context.Update(account);
                 _context.SaveChanges();
 
-                return Ok(dto);
+                return Ok();
              
             }
             catch (Exception ex)
@@ -277,32 +289,80 @@ namespace myclinic_back.Controllers
         }
 
         [HttpDelete("[action]/{idAccount}")]
-        [Authorize]
+        //[Authorize]
         public ActionResult DeleteAccount(int idAccount)
         {
             try
             {
-                var account = _context.Accounts.FirstOrDefault(a => a.IdAccount == idAccount);
+                var account = _context.Accounts
+                    .Include(a => a.Role)
+                    .FirstOrDefault(a => a.IdAccount == idAccount);
 
                 if (account == null)
                 {
                     return NotFound($"Account with idAccount {idAccount} was not found.");
                 }
 
-                _context.Remove(account);
-                _context.SaveChanges();
+                var reservations = _context.Reservations
+                    .Include(r => r.Notifications)
+                    .Include(r => r.Appointment)
+                    .Where(r => r.PatientId == idAccount)
+                    .ToList();
 
-                GetAccountDto dto = new GetAccountDto()
+                var notifications = reservations
+                    .SelectMany(r => r.Notifications)
+                    .ToList();
+
+                if (notifications.Any())
                 {
-                    IdAccount = account.IdAccount,
-                    FirstName = account.FirstName,
-                    LastName = account.LastName,
-                    EmailAddres = account.EmailAddress,
-                    Role = account.Role.Name,
-                    Specialization = ""
-                };
+                    _context.Notifications.RemoveRange(notifications);
+                }
 
-                return Ok(dto);
+                var appointments = reservations
+                    .Select(r => r.Appointment)
+                    .Where(a => a != null)
+                    .ToList();
+
+                if (appointments.Any())
+                {
+                    _context.Appointments.RemoveRange(appointments);
+                }
+
+                if (reservations.Any())
+                {
+                    _context.Reservations.RemoveRange(reservations);
+                }
+
+                var healthRecord = _context.HealthRecords
+                    .FirstOrDefault(h => h.PatientId == idAccount);
+
+                if (healthRecord != null)
+                {
+                    _context.HealthRecords.Remove(healthRecord);
+                }
+
+                var patient = _context.Patients.FirstOrDefault(p => p.AccountId == idAccount);
+                if (patient != null)
+                {
+                    _context.Patients.Remove(patient);
+                }
+
+                var doctor = _context.Doctors.FirstOrDefault(d => d.AccountId == idAccount);
+                if (doctor != null)
+                {
+                    _context.Doctors.Remove(doctor);
+                }
+
+                var admin = _context.Admins.FirstOrDefault(a => a.AccountId == idAccount);
+                if (admin != null)
+                {
+                    _context.Admins.Remove(admin);
+                }
+
+                _context.Accounts.Remove(account);
+
+                _context.SaveChanges();
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -337,12 +397,7 @@ namespace myclinic_back.Controllers
                 var secureKey = _configuration["JWT:SecureKey"];
                 var SerializedToken = JwtTokenProvider.CreateToken(secureKey, 120, account.EmailAddress, account.Role.Name);
 
-                return Ok(new
-                {
-                    token = SerializedToken,
-                    role = account.Role.Name,
-                    email = account.EmailAddress
-                });
+                return Ok(SerializedToken);
             }
             catch (Exception ex)
             {

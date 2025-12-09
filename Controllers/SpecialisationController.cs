@@ -132,6 +132,15 @@ namespace myclinic_back.Controllers
                     return NotFound($"Specialisation with ID {idSpecialisation} not found.");
                 }
 
+                var doctors = _context.Doctors.Where(d => d.SpecializationId == specialisation.IdSpecialization).ToList();
+
+                foreach ( var doctor in doctors)
+                {
+                    _context.Remove(doctor);
+                }
+
+                _context.SaveChanges();
+
                 _context.Specializations.Remove(specialisation);
                 _context.SaveChanges();
 

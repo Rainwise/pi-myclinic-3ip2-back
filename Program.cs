@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using myclinic_back.Models;
 using System.Text;
+using myclinic_back.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Swagger using Swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 var secureKey = builder.Configuration["JWT:SecureKey"];
 builder.Services
@@ -24,6 +27,9 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Key)
         };
     });
+
+builder.Services.AddDbContext<PiProjectContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthorization();
 
