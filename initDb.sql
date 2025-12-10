@@ -33,9 +33,9 @@ GO
 
 
 -- Seed doctor
-INSERT INTO dbo.Doctors (FirstName, LastName, Email, PhoneNumber, Specialization, LicenseNumber, DateOfBirth, HireDate)
+INSERT INTO dbo.Doctors (FirstName, LastName, Email, PhoneNumber, Specialization, LicenseNumber)
 VALUES
-    ('John', 'Smith', 'john.smith@clinic.com', '+1-555-0101', 'Cardiology', 'LIC-12345', '1980-05-15', '2020-01-15'),
-    ('Sarah', 'Johnson', 'sarah.johnson@clinic.com', '+1-555-0102', 'Pediatrics', 'LIC-12346', '1985-08-22', '2021-03-10'),
-    ('Michael', 'Brown', 'michael.brown@clinic.com', '+1-555-0103', 'Orthopedics', 'LIC-12347', '1978-11-30', '2019-06-01');
+    ('John', 'Smith', 'john.smith@clinic.com', '+1-555-0101', 'Cardiology', 'LIC-12345'),
+    ('Sarah', 'Johnson', 'sarah.johnson@clinic.com', '+1-555-0102', 'Pediatrics', 'LIC-12346'),
+    ('Michael', 'Brown', 'michael.brown@clinic.com', '+1-555-0103', 'Orthopedics', 'LIC-12347');
 GO
