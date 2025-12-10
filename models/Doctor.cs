@@ -31,14 +31,5 @@ public class Doctor
     [MaxLength(50)]
     public string LicenseNumber { get; set; } = string.Empty;
 
-    public DateTime? DateOfBirth { get; set; }
-
-    [Required]
-    public DateTime HireDate { get; set; } = DateTime.UtcNow.Date;
-
     public bool IsActive { get; set; } = true;
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

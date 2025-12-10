@@ -11,11 +11,7 @@ public class DoctorDto
     public string? PhoneNumber { get; set; }
     public string Specialization { get; set; } = string.Empty;
     public string LicenseNumber { get; set; } = string.Empty;
-    public DateTime? DateOfBirth { get; set; }
-    public DateTime HireDate { get; set; }
     public bool IsActive { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 }
 
 public class CreateDoctorDto
@@ -44,9 +40,6 @@ public class CreateDoctorDto
     [MaxLength(50)]
     public string LicenseNumber { get; set; } = string.Empty;
 
-    public DateTime? DateOfBirth { get; set; }
-
-    public DateTime? HireDate { get; set; }
 }
 
 public class UpdateDoctorDto
@@ -69,10 +62,6 @@ public class UpdateDoctorDto
 
     [MaxLength(50)]
     public string? LicenseNumber { get; set; }
-
-    public DateTime? DateOfBirth { get; set; }
-
-    public DateTime? HireDate { get; set; }
 
     public bool? IsActive { get; set; }
 }

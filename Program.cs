@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Configure Database Context
-// Use environment variable or configuration to choose connection string
 var useDockerConnection = builder.Configuration.GetValue<bool>("UseDockerConnection");
 var connectionString = useDockerConnection
     ? builder.Configuration.GetConnectionString("DockerConnection")

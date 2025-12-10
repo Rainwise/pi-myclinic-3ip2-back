@@ -49,11 +49,7 @@ public class DoctorService : IDoctorService
             PhoneNumber = createDoctorDto.PhoneNumber,
             Specialization = createDoctorDto.Specialization,
             LicenseNumber = createDoctorDto.LicenseNumber,
-            DateOfBirth = createDoctorDto.DateOfBirth,
-            HireDate = createDoctorDto.HireDate ?? DateTime.UtcNow.Date,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
         };
 
         _context.Doctors.Add(doctor);
@@ -87,16 +83,8 @@ public class DoctorService : IDoctorService
         if (updateDoctorDto.LicenseNumber != null)
             doctor.LicenseNumber = updateDoctorDto.LicenseNumber;
 
-        if (updateDoctorDto.DateOfBirth.HasValue)
-            doctor.DateOfBirth = updateDoctorDto.DateOfBirth;
-
-        if (updateDoctorDto.HireDate.HasValue)
-            doctor.HireDate = updateDoctorDto.HireDate.Value;
-
         if (updateDoctorDto.IsActive.HasValue)
             doctor.IsActive = updateDoctorDto.IsActive.Value;
-
-        doctor.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
@@ -126,11 +114,7 @@ public class DoctorService : IDoctorService
             PhoneNumber = doctor.PhoneNumber,
             Specialization = doctor.Specialization,
             LicenseNumber = doctor.LicenseNumber,
-            DateOfBirth = doctor.DateOfBirth,
-            HireDate = doctor.HireDate,
             IsActive = doctor.IsActive,
-            CreatedAt = doctor.CreatedAt,
-            UpdatedAt = doctor.UpdatedAt
         };
     }
 }
