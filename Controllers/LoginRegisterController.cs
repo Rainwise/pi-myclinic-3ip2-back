@@ -57,11 +57,11 @@ namespace myclinic_back.Controllers
             {
                 var loginFailMessage = "Incorrect username or password";
 
-                var admin = _context.Admins.FirstOrDefault(a => a.Email == dto.Email);
+                var admin = _context.Admins.FirstOrDefault(a => a.Username == dto.Username);
 
                 if (admin == null)
                 {
-                    return NotFound($"Account with email address {dto.Email} was not found.");
+                    return NotFound($"Account with username {dto.Username} was not found.");
                 }
 
                 var b64hash = PasswordHashProvider.GetHash(dto.Password, admin.PasswordSalt);
