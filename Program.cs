@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using myclinic_back.Interfaces;
+using myclinic_back.Mappers;
 using myclinic_back.Models;
+using myclinic_back.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,6 +73,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<PiProjectContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<ISpecializationService, SpecializationService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddAuthorization();
 

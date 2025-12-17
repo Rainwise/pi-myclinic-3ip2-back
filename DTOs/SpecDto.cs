@@ -1,7 +1,7 @@
 ﻿namespace myclinic_back.Dtos
 {
-    public class UpdateSpecDto
-    {   
+    public class SpecDto
+    {
         public string Name { get; set; } = null!;
     }
 }

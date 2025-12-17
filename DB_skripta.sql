@@ -52,3 +52,5 @@ insert into Specialization values ('Plastièni kirurg')
 select * from admin
 select * from patient
 select * from healthrecord
+select * from Doctors
+select * from Specialization

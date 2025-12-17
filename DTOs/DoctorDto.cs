@@ -1,6 +1,6 @@
 ﻿namespace myclinic_back.DTOs
 {
-    public class CreatePatientDto
+    public class DoctorDto
     {
         public string FirstName { get; set; } = null!;
 
@@ -9,6 +9,10 @@
         public string Email { get; set; } = null!;
 
         public string? PhoneNumber { get; set; }
+
+        public int SpecializationId { get; set; }
+
+        public string LicenseNumber { get; set; } = null!;
 
         public bool IsActive { get; set; }
     }

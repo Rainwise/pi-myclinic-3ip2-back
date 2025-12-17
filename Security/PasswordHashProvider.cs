@@ -5,14 +5,6 @@ namespace PRA_1.Security
 {
     public class PasswordHashProvider
     {
-        public static string GetSalt()
-        {
-            byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
-            string b64Salt = Convert.ToBase64String(salt);
-
-            return b64Salt;
-        }
-
         public static string GetHash(string password, string b64salt)
         {
             byte[] salt = Convert.FromBase64String(b64salt);

@@ -1,4 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using myclinic_back.DTOs;
+using myclinic_back.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -7,8 +9,11 @@ namespace PRA_1.Security
 {
     public class JwtTokenProvider
     {
-        public static string CreateToken(string secureKey, int expirationMinutes, string email, string role, string? username = null)
+        public static LoginResponseDto CreateToken(string secureKey, string email, string? username = null)
         {
+            var role = "Admin";
+            var expirationMinutes = 120;
+            var expiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes);
             var keyBytes = Encoding.UTF8.GetBytes(secureKey);
             var signingKey = new SymmetricSecurityKey(keyBytes);
 
@@ -31,7 +36,15 @@ namespace PRA_1.Security
 
             var handler = new JwtSecurityTokenHandler();
             var token = handler.CreateToken(tokenDescriptor);
-            return handler.WriteToken(token);
+
+            return new LoginResponseDto
+            {
+                Token = handler.WriteToken(token),
+                Username = username,
+                Email = email,
+                Role = role,
+                ExpiresAt = expiresAt
+            };
         }
     }
 }

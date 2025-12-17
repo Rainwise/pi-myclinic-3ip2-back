@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using myclinic_back.DTOs;
+using myclinic_back.Interfaces;
 using myclinic_back.Models;
+using myclinic_back.Services;
 using System.Numerics;
 
 namespace myclinic_back.Controllers
@@ -13,41 +15,24 @@ namespace myclinic_back.Controllers
     [Authorize]
     public class PatientController : ControllerBase
     {
-        private readonly PiProjectContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IPatientService _patientService;
 
-        public PatientController(PiProjectContext context, IConfiguration configuration)
+        public PatientController(IConfiguration configuration, IPatientService patientService)
         {
-            _context = context;
             _configuration = configuration;
+            _patientService = patientService;
         }
 
         [HttpGet("{idPatient}")]
-        public ActionResult GetPatientById(int idPatient)
+        public async Task<ActionResult> GetPatientById(int idPatient)
         {
             try
             {
-                var patient = _context.Patients
-                    .Include(p => p.HealthRecords)
-                    .FirstOrDefault(p => p.IdPatient == idPatient);
+                var patient = await _patientService.GetByIdAsync(idPatient);
 
-                if (patient == null)
-                {
-                    return NotFound();
-                }
+                return patient is null ? NotFound() : Ok(patient);
 
-                GetPatientDto dto = new GetPatientDto()
-                {
-                    IdPatient = patient.IdPatient,
-                    FirstName = patient.FirstName,
-                    LastName = patient.LastName,
-                    Email = patient.Email,
-                    PhoneNumber = patient.PhoneNumber,
-                    IsActive = patient.IsActive,
-                    HealthRecordId = (int)patient.HealthRecords.FirstOrDefault(h => h.PatientId == idPatient).PatientId,
-                };
-
-                return Ok(dto);
             }
             catch (Exception ex)
             {
@@ -56,33 +41,13 @@ namespace myclinic_back.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetPatients()
+        public async Task<ActionResult> GetPatients()
         {
             try
             {
-                var patients = _context.Patients
-                    .Include(p => p.HealthRecords)
-                    .ToList();
+                var patients = await _patientService.GetAllAsync();
 
-                var dtos = new List<GetPatientDto>();
-
-                foreach (var p in patients)
-                {
-                    GetPatientDto dto = new GetPatientDto()
-                    {
-                        IdPatient = p.IdPatient,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        Email = p.Email,
-                        PhoneNumber = p.PhoneNumber,
-                        IsActive = p.IsActive,
-                        HealthRecordId = (int)p.HealthRecords.FirstOrDefault(h => h.PatientId == p.IdPatient).PatientId,
-                    };
-
-                    dtos.Add(dto);
-                }
-
-                return Ok(dtos);
+                return Ok(patients);
             }
             catch (Exception ex)
             {
@@ -91,29 +56,11 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreatePatient(CreatePatientDto dto)
+        public async Task<ActionResult> CreatePatient(PatientDto dto)
         {
             try
             {
-                var patient = new Patient()
-                {
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Email = dto.Email,
-                    PhoneNumber = dto.PhoneNumber,
-                    IsActive = dto.IsActive,
-                };
-
-                _context.Add(patient);
-                _context.SaveChanges();
-
-                var healthRecord = new HealthRecord()
-                {
-                    PatientId = patient.IdPatient
-                };
-
-                _context.Add(healthRecord);
-                _context.SaveChanges();
+                await _patientService.CreateObjectAsync(dto);
 
                 return Ok();
             }
@@ -124,25 +71,11 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPut("{idPatient}")]
-        public ActionResult UpdatePatient(int idPatient, UpdatePatientDto dto)
+        public async Task<ActionResult> UpdatePatient(int idPatient, PatientDto dto)
         {
             try
             {
-                var patient = _context.Patients.FirstOrDefault(p => p.IdPatient == idPatient);
-
-                if (patient == null)
-                {
-                    return NotFound();
-                }
-
-                patient.FirstName = string.IsNullOrWhiteSpace(dto.FirstName) || dto.FirstName == "string" ? patient.FirstName : dto.FirstName;
-                patient.LastName = string.IsNullOrWhiteSpace(dto.LastName) || dto.LastName == "string" ? patient.LastName : dto.LastName;
-                patient.Email = string.IsNullOrWhiteSpace(dto.Email) || dto.Email == "string" ? patient.Email : dto.Email;
-                patient.PhoneNumber = string.IsNullOrWhiteSpace(dto.PhoneNumber) || dto.PhoneNumber == "string" ? patient.PhoneNumber : dto.PhoneNumber;
-                patient.IsActive = dto.IsActive;
-               
-                _context.Update(patient);
-                _context.SaveChanges();
+                await _patientService.UpdateObjectAsync(idPatient, dto);
 
                 return Ok();
             }
@@ -153,22 +86,11 @@ namespace myclinic_back.Controllers
         }
 
         [HttpDelete("{idPatient}")]
-        public ActionResult DeletePatient(int idPatient)
+        public async Task<ActionResult> DeletePatient(int idPatient)
         {
             try
             {
-                var patient = _context.Patients.FirstOrDefault(p => p.IdPatient == idPatient);
-
-                if (patient == null)
-                {
-                    return NotFound();
-                }
-
-                var healthRecord = _context.HealthRecords.FirstOrDefault(h => h.PatientId == idPatient);
-
-                _context.HealthRecords.Remove(healthRecord);
-                _context.Remove(patient);
-                _context.SaveChanges();
+                await _patientService.DeleteObjectAsync(idPatient);
 
                 return Ok();
             }

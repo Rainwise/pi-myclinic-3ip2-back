@@ -1,6 +1,6 @@
 ﻿namespace myclinic_back.DTOs
 {
-    public class UpdatePatientDto
+    public class PatientDto
     {
         public string FirstName { get; set; } = null!;
 

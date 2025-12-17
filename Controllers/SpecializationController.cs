@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using myclinic_back.Dtos;
+using myclinic_back.Interfaces;
 using myclinic_back.Models;
+using myclinic_back.Services;
+using System.Threading.Tasks;
 
 namespace myclinic_back.Controllers
 {
@@ -11,34 +14,23 @@ namespace myclinic_back.Controllers
     [Authorize]
     public class SpecializationController : ControllerBase
     {
-        private readonly PiProjectContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ISpecializationService _specService;
 
-        public SpecializationController(PiProjectContext context, IConfiguration configuration)
+        public SpecializationController(IConfiguration configuration, ISpecializationService specializationService)
         {
-            _context = context;
             _configuration = configuration;
+            _specService = specializationService;
         }
 
         [HttpGet("{idSpecialisation}")]
-        public ActionResult GetSpecialisationById(int idSpecialisation)
+        public async Task<ActionResult> GetSpecialisationById(int idSpecialisation)
         {
             try
             {
-                var specialisation = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == idSpecialisation);
-
-                if (specialisation == null)
-                {
-                    return NotFound($"Specialisation with ID {idSpecialisation} not found.");
-                }
-
-                var dto = new GetSpecialisationDto()
-                {
-                    IdSpecialization = specialisation.IdSpecialization,
-                    Name = specialisation.Name
-                };
-
-                return Ok(dto);
+                var specialisation = await _specService.GetByIdAsync(idSpecialisation);
+                
+                return specialisation is null ? NotFound() : Ok(specialisation);
             }
             catch (Exception ex)
             {
@@ -47,26 +39,13 @@ namespace myclinic_back.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetSpecialisations()
+        public async Task<ActionResult> GetSpecialisations()
         {
             try
             {
-                var specialisations = _context.Specializations.ToList();
+                var specialisations = await _specService.GetAllAsync();
 
-                var specs = new List<GetSpecialisationDto>();
-
-                foreach (var s in specialisations)
-                {
-                    var dto = new GetSpecialisationDto()
-                    {
-                        IdSpecialization = s.IdSpecialization,
-                        Name = s.Name
-                    };
-
-                    specs.Add(dto);
-                }
-
-                return Ok(specs);
+                return Ok(specialisations);
             }
             catch (Exception ex)
             {
@@ -75,19 +54,14 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateSpecialisation(CreateSpecDto dto)
+        public async Task<ActionResult> CreateSpecialisation(SpecDto dto)
         {
             try
             {
-                var specialisation = new Specialization()
-                {
-                    Name = dto.Name
-                };
+                
+                await _specService.CreateObjectAsync(dto);
 
-                _context.Specializations.Add(specialisation);
-                _context.SaveChanges();
-
-                return Ok(specialisation);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -96,24 +70,13 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateSpecialisation(int idSpecialisation, UpdateSpecDto dto)
+        public async Task<ActionResult> UpdateSpecialisation(int idSpecialisation, SpecDto dto)
         {
             try
             {
+                await _specService.UpdateObjectAsync(idSpecialisation, dto);
 
-                var specialisation = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == idSpecialisation);
-
-                if (specialisation == null)
-                {
-                    return NotFound($"Specialisation with ID {idSpecialisation} not found.");
-                }
-
-                specialisation.Name = string.IsNullOrWhiteSpace(dto.Name) ? specialisation.Name : dto.Name;
-
-                _context.Specializations.Update(specialisation);
-                _context.SaveChanges();
-
-                return Ok(specialisation);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -123,28 +86,11 @@ namespace myclinic_back.Controllers
         }
 
         [HttpDelete("{idSpecialisation}")]
-        public ActionResult DeleteSpecialisation(int idSpecialisation)
+        public async Task<ActionResult> DeleteSpecialisation(int idSpecialisation)
         {
             try
             {
-                var specialisation = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == idSpecialisation);
-
-                if (specialisation == null)
-                {
-                    return NotFound($"Specialisation with ID {idSpecialisation} not found.");
-                }
-
-                var doctors = _context.Doctors.Where(d => d.SpecializationId == specialisation.IdSpecialization).ToList();
-
-                foreach (var doctor in doctors)
-                {
-                    _context.Remove(doctor);
-                }
-
-                _context.SaveChanges();
-
-                _context.Specializations.Remove(specialisation);
-                _context.SaveChanges();
+                await _specService.DeleteObjectAsync(idSpecialisation);  
 
                 return Ok();
             }
