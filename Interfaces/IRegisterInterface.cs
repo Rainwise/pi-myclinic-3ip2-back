@@ -2,8 +2,9 @@
 
 namespace myclinic_back.Interfaces
 {
-    public interface IRegisterInterface
+    public interface IRegisterInterface<T, TDto>
     {
-        void RegisterUser(RegisterDto dto);
+        void RegisterUser(TDto dto);
+        T Register(TDto dto);
     }
 }

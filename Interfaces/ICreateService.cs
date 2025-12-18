@@ -2,8 +2,9 @@
 
 namespace myclinic_back.Interfaces
 {
-    public interface ICreateService<TDto>
+    public interface ICreateService<T, TDto>
     {
         Task CreateObjectAsync(TDto dto);
+        T CreateObject(TDto input);
     }
 }
