@@ -1,40 +1,36 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using myclinic_back.DTOs;
+using myclinic_back.Dtos;
 using myclinic_back.Interfaces;
 using myclinic_back.Models;
 using myclinic_back.Services;
-using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace myclinic_back.Controllers
 {
-    [Route("api/Doctors")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class DoctorController : ControllerBase
+    public class SpecializationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IDoctorService _doctorService;
+        private readonly ISpecializationService _specService;
 
-        public DoctorController(IConfiguration configuration, IDoctorService doctor)
+        public SpecializationController(IConfiguration configuration, ISpecializationService specializationService)
         {
             _configuration = configuration;
-            _doctorService = doctor;
+            _specService = specializationService;
         }
 
-        [HttpGet("{idDoctor}")]
-        public async Task<ActionResult> GetDoctorById(int idDoctor)
+        [HttpGet("{idSpecialisation}")]
+        public async Task<ActionResult> GetSpecialisationById(int idSpecialisation)
         {
             try
             {
-                var doctor = await _doctorService.GetByIdAsync(idDoctor);
-
-                return doctor is null ? NotFound() : Ok(doctor);
-
+                var specialisation = await _specService.GetByIdAsync(idSpecialisation);
+                
+                return specialisation is null ? NotFound() : Ok(specialisation);
             }
             catch (Exception ex)
             {
@@ -42,16 +38,14 @@ namespace myclinic_back.Controllers
             }
         }
 
-
         [HttpGet]
-        public async Task<ActionResult> GetDoctors()
+        public async Task<ActionResult> GetSpecialisations()
         {
             try
             {
-                var doctors = await _doctorService.GetAllAsync();
+                var specialisations = await _specService.GetAllAsync();
 
-                return Ok(doctors);
-
+                return Ok(specialisations);
             }
             catch (Exception ex)
             {
@@ -60,11 +54,12 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateDoctor(DoctorDto dto)
+        public async Task<ActionResult> CreateSpecialisation(SpecDto dto)
         {
             try
             {
-                await _doctorService.CreateObjectAsync(dto);
+                
+                await _specService.CreateObjectAsync(dto);
 
                 return Ok();
             }
@@ -74,12 +69,12 @@ namespace myclinic_back.Controllers
             }
         }
 
-        [HttpPut("{idDoctor}")]
-        public async Task<ActionResult> UpdateDoctor(int idDoctor, DoctorDto dto)
+        [HttpPut]
+        public async Task<ActionResult> UpdateSpecialisation(int idSpecialisation, SpecDto dto)
         {
             try
             {
-                await _doctorService.UpdateObjectAsync(idDoctor, dto);
+                await _specService.UpdateObjectAsync(idSpecialisation, dto);
 
                 return Ok();
             }
@@ -87,14 +82,15 @@ namespace myclinic_back.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+
         }
 
-        [HttpDelete("{idDoctor}")]
-        public async Task<ActionResult> DeleteDoctor(int idDoctor)
+        [HttpDelete("{idSpecialisation}")]
+        public async Task<ActionResult> DeleteSpecialisation(int idSpecialisation)
         {
             try
             {
-                await _doctorService.DeleteObjectAsync(idDoctor);
+                await _specService.DeleteObjectAsync(idSpecialisation);  
 
                 return Ok();
             }

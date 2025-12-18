@@ -19,6 +19,10 @@ public partial class PiProjectContext : DbContext
 
     public virtual DbSet<Doctor> Doctors { get; set; }
 
+    public virtual DbSet<HealthRecord> HealthRecords { get; set; }
+
+    public virtual DbSet<Patient> Patients { get; set; }
+
     public virtual DbSet<Specialization> Specializations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -61,6 +65,32 @@ public partial class PiProjectContext : DbContext
                 .HasForeignKey(d => d.SpecializationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Doctors__Special__52593CB8");
+        });
+
+        modelBuilder.Entity<HealthRecord>(entity =>
+        {
+            entity.HasKey(e => e.IdHealthRecord).HasName("PK__HealthRe__14E9E5EF752BC6DD");
+
+            entity.ToTable("HealthRecord");
+
+            entity.HasOne(d => d.Patient).WithMany(p => p.HealthRecords)
+                .HasForeignKey(d => d.PatientId)
+                .HasConstraintName("FK__HealthRec__Patie__6383C8BA");
+        });
+
+        modelBuilder.Entity<Patient>(entity =>
+        {
+            entity.HasKey(e => e.IdPatient).HasName("PK__Patient__B7E7B5A4D99601C1");
+
+            entity.ToTable("Patient");
+
+            entity.HasIndex(e => e.Email, "UQ__Patient__A9D10534BDB790AB").IsUnique();
+
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.FirstName).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Specialization>(entity =>

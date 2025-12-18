@@ -7,33 +7,31 @@ using myclinic_back.Interfaces;
 using myclinic_back.Models;
 using myclinic_back.Services;
 using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
 
 namespace myclinic_back.Controllers
 {
-    [Route("api/Doctors")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class DoctorController : ControllerBase
+    public class PatientController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IDoctorService _doctorService;
+        private readonly IPatientService _patientService;
 
-        public DoctorController(IConfiguration configuration, IDoctorService doctor)
+        public PatientController(IConfiguration configuration, IPatientService patientService)
         {
             _configuration = configuration;
-            _doctorService = doctor;
+            _patientService = patientService;
         }
 
-        [HttpGet("{idDoctor}")]
-        public async Task<ActionResult> GetDoctorById(int idDoctor)
+        [HttpGet("{idPatient}")]
+        public async Task<ActionResult> GetPatientById(int idPatient)
         {
             try
             {
-                var doctor = await _doctorService.GetByIdAsync(idDoctor);
+                var patient = await _patientService.GetByIdAsync(idPatient);
 
-                return doctor is null ? NotFound() : Ok(doctor);
+                return patient is null ? NotFound() : Ok(patient);
 
             }
             catch (Exception ex)
@@ -42,16 +40,14 @@ namespace myclinic_back.Controllers
             }
         }
 
-
         [HttpGet]
-        public async Task<ActionResult> GetDoctors()
+        public async Task<ActionResult> GetPatients()
         {
             try
             {
-                var doctors = await _doctorService.GetAllAsync();
+                var patients = await _patientService.GetAllAsync();
 
-                return Ok(doctors);
-
+                return Ok(patients);
             }
             catch (Exception ex)
             {
@@ -60,11 +56,11 @@ namespace myclinic_back.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateDoctor(DoctorDto dto)
+        public async Task<ActionResult> CreatePatient(PatientDto dto)
         {
             try
             {
-                await _doctorService.CreateObjectAsync(dto);
+                await _patientService.CreateObjectAsync(dto);
 
                 return Ok();
             }
@@ -74,12 +70,12 @@ namespace myclinic_back.Controllers
             }
         }
 
-        [HttpPut("{idDoctor}")]
-        public async Task<ActionResult> UpdateDoctor(int idDoctor, DoctorDto dto)
+        [HttpPut("{idPatient}")]
+        public async Task<ActionResult> UpdatePatient(int idPatient, PatientDto dto)
         {
             try
             {
-                await _doctorService.UpdateObjectAsync(idDoctor, dto);
+                await _patientService.UpdateObjectAsync(idPatient, dto);
 
                 return Ok();
             }
@@ -89,12 +85,12 @@ namespace myclinic_back.Controllers
             }
         }
 
-        [HttpDelete("{idDoctor}")]
-        public async Task<ActionResult> DeleteDoctor(int idDoctor)
+        [HttpDelete("{idPatient}")]
+        public async Task<ActionResult> DeletePatient(int idPatient)
         {
             try
             {
-                await _doctorService.DeleteObjectAsync(idDoctor);
+                await _patientService.DeleteObjectAsync(idPatient);
 
                 return Ok();
             }

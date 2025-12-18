@@ -2,8 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using myclinic_back.DTOs;
+using myclinic_back.Interfaces;
 using myclinic_back.Models;
+using myclinic_back.Security;
+using myclinic_back.Services;
 using PRA_1.Security;
+using System.Threading.Tasks;
 
 namespace myclinic_back.Controllers
 {
@@ -11,34 +15,22 @@ namespace myclinic_back.Controllers
     [ApiController]
     public class LoginRegisterController : ControllerBase
     {
-        private readonly PiProjectContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAdminService _adminService;
 
-        public LoginRegisterController(PiProjectContext context, IConfiguration configuration)
+        public LoginRegisterController(IConfiguration configuration, IAdminService adminService)
         {
-            _context = context;
             _configuration = configuration;
+            _adminService = adminService;
         }
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public ActionResult RegisterUser(RegisterDto dto)
+        public async Task<ActionResult> RegisterUser(RegisterDto dto)
         {
             try
             {
-                var b64salt = PasswordHashProvider.GetSalt();
-                var b64hash = PasswordHashProvider.GetHash(dto.Password, b64salt);
-
-                var admin = new Admin()
-                {
-                    Email = dto.Email,
-                    Username = dto.Username,
-                    PasswordSalt = b64salt,
-                    PasswordHash = b64hash
-                };
-
-                _context.Add(admin);
-                _context.SaveChanges();
+                _adminService.RegisterUser(dto);
 
                 return Ok();
             }
@@ -51,48 +43,13 @@ namespace myclinic_back.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public ActionResult LoginUser(LoginDto dto)
+        public async Task<ActionResult> LoginUserAsync(LoginDto dto)
         {
             try
             {
-                var loginFailMessage = "Incorrect username or password";
+                var loginData = await _adminService.LoginUserAsync(dto);
 
-                var admin = _context.Admins.FirstOrDefault(a => a.Username == dto.Username);
-
-                if (admin == null)
-                {
-                    return NotFound($"Account with username {dto.Username} was not found.");
-                }
-
-                var b64hash = PasswordHashProvider.GetHash(dto.Password, admin.PasswordSalt);
-
-                if (b64hash != admin.PasswordHash)
-                {
-                    return BadRequest(loginFailMessage);
-                }
-
-                var secureKey = _configuration["JWT:SecureKey"];
-
-                var role = "Admin";
-                var expirationMinutes = 120;
-                var expiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes);
-
-                var token = JwtTokenProvider.CreateToken(
-                    secureKey,
-                    expirationMinutes,
-                    email: admin.Email,
-                    role: role,
-                    username: admin.Username
-                );
-
-                return Ok(new
-                {
-                    token,
-                    username = admin.Username,
-                    email = admin.Email,
-                    role,
-                    expiresAt
-                });
+                return Ok(loginData);
             }
             catch (Exception ex)
             {

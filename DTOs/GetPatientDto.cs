@@ -1,7 +1,9 @@
 ﻿namespace myclinic_back.DTOs
 {
-    public class UpdateDoctorDto
+    public class GetPatientDto
     {
+        public int IdPatient { get; set; }
+
         public string FirstName { get; set; } = null!;
 
         public string LastName { get; set; } = null!;
@@ -10,10 +12,8 @@
 
         public string? PhoneNumber { get; set; }
 
-        public int SpecializationId { get; set; }
-
-        public string LicenseNumber { get; set; } = null!;
-
         public bool IsActive { get; set; }
+
+        public int HealthRecordId { get; set; }
     }
 }
