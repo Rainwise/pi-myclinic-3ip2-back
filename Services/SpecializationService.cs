@@ -19,11 +19,7 @@ namespace myclinic_back.Services
             var specialisation = await _context.Specializations
                 .FirstOrDefaultAsync(s => s.IdSpecialization == id);
 
-            var dto = new GetSpecialisationDto()
-            {
-                IdSpecialization = specialisation.IdSpecialization,
-                Name = specialisation.Name
-            };
+            var dto = GetObject(specialisation);
 
             return dto;
         }
@@ -36,11 +32,7 @@ namespace myclinic_back.Services
 
             foreach (var s in specialisations)
             {
-                var dto = new GetSpecialisationDto()
-                {
-                    IdSpecialization = s.IdSpecialization,
-                    Name = s.Name
-                };
+                var dto = GetObject(s);
 
                 specs.Add(dto);
             }
@@ -50,22 +42,16 @@ namespace myclinic_back.Services
 
         public async Task CreateObjectAsync(SpecDto dto)
         {
-            var specialisation = new Specialization()
-            {
-                Name = dto.Name
-            };
-
-            _context.Specializations.Add(specialisation);
+           
+            var specialization = CreateObject(dto);
+            _context.Specializations.Add(specialization);
             _context.SaveChanges();
         }
 
         public async Task UpdateObjectAsync(int id, SpecDto dto)
         {
             var specialisation = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == id);
-
-            specialisation.Name = string.IsNullOrWhiteSpace(dto.Name) ? specialisation.Name : dto.Name;
-
-            _context.Specializations.Update(specialisation);
+            _context.Specializations.Update(UpdateObject(specialisation, dto));
             _context.SaveChanges();
         }
 
@@ -84,6 +70,34 @@ namespace myclinic_back.Services
 
             _context.Specializations.Remove(specialisation);
             _context.SaveChanges();
+        }
+
+        public GetSpecialisationDto GetObject(Specialization specialisation)
+        {
+            var dto = new GetSpecialisationDto()
+            {
+                IdSpecialization = specialisation.IdSpecialization,
+                Name = specialisation.Name
+            };
+
+            return dto;
+        }
+
+        public Specialization CreateObject(SpecDto dto)
+        {
+            var specialisation = new Specialization()
+            {
+                Name = dto.Name
+            };
+
+            return specialisation;
+        }
+
+        public Specialization UpdateObject(Specialization specialisation, SpecDto dto)
+        {
+            specialisation.Name = string.IsNullOrWhiteSpace(dto.Name) ? specialisation.Name : dto.Name;
+
+            return specialisation;
         }
     }
 }

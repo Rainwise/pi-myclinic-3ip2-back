@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using myclinic_back.Interfaces;
-using myclinic_back.Mappers;
 using myclinic_back.Models;
 using myclinic_back.Services;
 using System.Text;

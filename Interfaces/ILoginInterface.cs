@@ -2,8 +2,11 @@
 
 namespace myclinic_back.Interfaces
 {
-    public interface ILoginInterface
+    public interface ILoginInterface<T, TDto, TResponse>
     {
-        Task<LoginResponseDto> LoginUserAsync(LoginDto dto);
+        Task<TResponse> LoginUserAsync(TDto dto);
+
+        TResponse Login(T obj, TDto dto);
+
     }
 }

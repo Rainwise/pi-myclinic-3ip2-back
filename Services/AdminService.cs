@@ -7,7 +7,7 @@ using PRA_1.Security;
 
 namespace myclinic_back.Services
 {
-    public class AdminService : Interfaces.IAdminService
+    public class AdminService : IAdminService
     {
         private readonly PiProjectContext _context;
         private readonly IConfiguration _configuration;
@@ -20,18 +20,7 @@ namespace myclinic_back.Services
 
         public void RegisterUser(RegisterDto dto)
         {
-            var b64salt = PasswordSaltProvider.GetSalt();
-            var b64hash = PasswordHashProvider.GetHash(dto.Password, b64salt);
-
-            var admin = new Admin()
-            {
-                Email = dto.Email,
-                Username = dto.Username,
-                PasswordSalt = b64salt,
-                PasswordHash = b64hash
-            };
-
-            _context.Add(admin);
+            _context.Add(Register(dto));
             _context.SaveChanges();
         }
 
@@ -41,7 +30,12 @@ namespace myclinic_back.Services
 
             var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == dto.Username);
 
-         
+            var token = Login(admin, dto);
+            return token;
+        }
+
+        public LoginResponseDto Login(Admin admin, LoginDto dto)
+        {
             var b64hash = PasswordHashProvider.GetHash(dto.Password, admin.PasswordSalt);
 
             var secureKey = _configuration["JWT:SecureKey"];
@@ -55,6 +49,20 @@ namespace myclinic_back.Services
             return token;
         }
 
-        
+        public Admin Register(RegisterDto dto)
+        {
+            var b64salt = PasswordSaltProvider.GetSalt();
+            var b64hash = PasswordHashProvider.GetHash(dto.Password, b64salt);
+
+            var admin = new Admin()
+            {
+                Email = dto.Email,
+                Username = dto.Username,
+                PasswordSalt = b64salt,
+                PasswordHash = b64hash
+            };
+
+            return admin;
+        }
     }
 }
