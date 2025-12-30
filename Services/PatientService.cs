@@ -4,16 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using myclinic_back.DTOs;
 using myclinic_back.Interfaces;
 using myclinic_back.Models;
+using System.Numerics;
 
 namespace myclinic_back.Services
 {
     public class PatientService : IPatientService
     {
         private readonly PiProjectContext _context;
-
-        public PatientService(PiProjectContext context)
+        private readonly IAuditLogger _logger;
+        public PatientService(PiProjectContext context, IAuditLogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<GetPatientDto> GetByIdAsync(int id)
@@ -56,6 +58,8 @@ namespace myclinic_back.Services
             _context.Add(healthRecord);
             _context.SaveChanges();
 
+            _logger.LogCrudAsync("Patient", "Created", patient.IdPatient);
+
         }
 
         public async Task UpdateObjectAsync(int id, PatientDto dto)
@@ -64,6 +68,8 @@ namespace myclinic_back.Services
 
             _context.Update(UpdateObject(patient, dto));
             _context.SaveChanges();
+
+            _logger.LogCrudAsync("Patient", "Updated", patient.IdPatient);
 
         }
 
@@ -76,6 +82,8 @@ namespace myclinic_back.Services
             _context.HealthRecords.Remove(healthRecord);
             _context.Remove(patient);
             _context.SaveChanges();
+
+            _logger.LogCrudAsync("Patient", "Deleted", patient.IdPatient);
         }
 
         public GetPatientDto GetObject(Patient patient)
@@ -105,6 +113,7 @@ namespace myclinic_back.Services
                 IsActive = dto.IsActive,
             };
 
+           
             return patient;
         }
 

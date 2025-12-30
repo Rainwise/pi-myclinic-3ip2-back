@@ -26,8 +26,6 @@ namespace myclinic_back.Services
 
         public async Task<LoginResponseDto> LoginUserAsync(LoginDto dto)
         {
-            var loginFailMessage = "Incorrect username or password";
-
             var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == dto.Username);
 
             var token = Login(admin, dto);
@@ -37,6 +35,17 @@ namespace myclinic_back.Services
         public LoginResponseDto Login(Admin admin, LoginDto dto)
         {
             var b64hash = PasswordHashProvider.GetHash(dto.Password, admin.PasswordSalt);
+
+            if (b64hash != admin.PasswordHash)
+            {
+                var badToken = JwtTokenProvider.CreateToken(
+                "---Incorrect username or password---",
+                email: "No email",
+                username: "No username"
+                );
+
+                return badToken;
+            }
 
             var secureKey = _configuration["JWT:SecureKey"];
 

@@ -21,13 +21,15 @@ public partial class PiProjectContext : DbContext
 
     public virtual DbSet<HealthRecord> HealthRecords { get; set; }
 
+    public virtual DbSet<Log> Logs { get; set; }
+
     public virtual DbSet<Patient> Patients { get; set; }
 
     public virtual DbSet<Specialization> Specializations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=PI_Project;User Id=sa;Password=SQL;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=.;Database=PI_Project;User=sa;Password=SQL;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,6 +78,13 @@ public partial class PiProjectContext : DbContext
             entity.HasOne(d => d.Patient).WithMany(p => p.HealthRecords)
                 .HasForeignKey(d => d.PatientId)
                 .HasConstraintName("FK__HealthRec__Patie__6383C8BA");
+        });
+
+        modelBuilder.Entity<Log>(entity =>
+        {
+            entity.HasKey(e => e.IdLog).HasName("PK__Log__0C54DBC6E26614DA");
+
+            entity.ToTable("Log");
         });
 
         modelBuilder.Entity<Patient>(entity =>

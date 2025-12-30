@@ -11,10 +11,11 @@ namespace myclinic_back.Services
     public class DoctorService : IDoctorService
     {
         private readonly PiProjectContext _context;
-
-        public DoctorService(PiProjectContext context)
+        private readonly IAuditLogger _logger;
+        public DoctorService(PiProjectContext context, IAuditLogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<GetDoctorDto> GetByIdAsync(int id)
@@ -53,6 +54,8 @@ namespace myclinic_back.Services
             _context.Add(doctor);
             _context.SaveChanges();
 
+            await _logger.LogCrudAsync("Doctor", "Created", doctor.IdDoctor);
+
         }
 
         public async Task UpdateObjectAsync(int id, DoctorDto dto)
@@ -64,6 +67,8 @@ namespace myclinic_back.Services
             _context.Update(UpdateObject(doctor, dto));
             _context.SaveChanges();
 
+            await _logger.LogCrudAsync("Doctor", "Updated", doctor.IdDoctor);
+
         }
 
         public async Task DeleteObjectAsync(int id)
@@ -72,6 +77,8 @@ namespace myclinic_back.Services
 
             _context.Remove(doctor);
             _context.SaveChanges();
+
+            await _logger.LogCrudAsync("Doctor", "Deleted", doctor.IdDoctor);
 
         }
 
