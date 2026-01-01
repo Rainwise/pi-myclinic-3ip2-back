@@ -8,10 +8,12 @@ namespace myclinic_back.Services
     public class SpecializationService : ISpecializationService
     {
         private readonly PiProjectContext _context;
+        private readonly IAuditLogger _logger;
 
-        public SpecializationService(PiProjectContext context)
+        public SpecializationService(PiProjectContext context, IAuditLogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<GetSpecialisationDto> GetByIdAsync(int id)
@@ -46,6 +48,8 @@ namespace myclinic_back.Services
             var specialization = CreateObject(dto);
             _context.Specializations.Add(specialization);
             _context.SaveChanges();
+
+            _logger.LogCrudAsync("Specialization", "Created", specialization.IdSpecialization);
         }
 
         public async Task UpdateObjectAsync(int id, SpecDto dto)
@@ -53,6 +57,8 @@ namespace myclinic_back.Services
             var specialisation = _context.Specializations.FirstOrDefault(s => s.IdSpecialization == id);
             _context.Specializations.Update(UpdateObject(specialisation, dto));
             _context.SaveChanges();
+
+            _logger.LogCrudAsync("Specialization", "Updated", specialisation.IdSpecialization);
         }
 
         public async Task DeleteObjectAsync(int id)
@@ -70,6 +76,8 @@ namespace myclinic_back.Services
 
             _context.Specializations.Remove(specialisation);
             _context.SaveChanges();
+
+            _logger.LogCrudAsync("Specialization", "Deleted", specialisation.IdSpecialization);
         }
 
         public GetSpecialisationDto GetObject(Specialization specialisation)

@@ -6,6 +6,7 @@ using Microsoft.OpenApi;
 using myclinic_back.Interfaces;
 using myclinic_back.Models;
 using myclinic_back.Services;
+using myclinic_back.Utilities;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<PiProjectContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
+builder.Services.AddSingleton<FileAuditObserver>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<ISpecializationService, SpecializationService>();
@@ -81,6 +84,9 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+var audit = app.Services.GetRequiredService<IAuditLogger>();
+audit.Subscribe(app.Services.GetRequiredService<FileAuditObserver>());
 
 if (app.Environment.IsDevelopment())
 {

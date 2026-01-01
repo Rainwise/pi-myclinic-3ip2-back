@@ -10,7 +10,7 @@ CREATE TABLE [Admin] (
     Username NVARCHAR(100) NOT NULL UNIQUE,
     Email NVARCHAR(255) NOT NULL UNIQUE,
     PasswordHash NVARCHAR(MAX) NOT NULL,
-	PasswordSalt Nvarchar(max) not null;
+	PasswordSalt Nvarchar(max) not null,
     IsActive BIT NOT NULL DEFAULT 1
 )
 
@@ -48,9 +48,17 @@ insert into Specialization values ('Opæa medicina')
 insert into Specialization values ('Psihijatrija')
 insert into Specialization values ('Plastièni kirurg')
 
+CREATE TABLE [Log] (
+	
+	IdLog int primary key identity(1,1),
+	[Message] nvarchar(max) NOT NULL,
+	[Timestamp] datetime2 NOT NULL
+)
+
 
 select * from admin
 select * from patient
 select * from healthrecord
 select * from Doctors
 select * from Specialization
+select * from [LOG]

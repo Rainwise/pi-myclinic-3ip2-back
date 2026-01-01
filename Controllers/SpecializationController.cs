@@ -69,7 +69,7 @@ namespace myclinic_back.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{idSpecialisation}")]
         public async Task<ActionResult> UpdateSpecialisation(int idSpecialisation, SpecDto dto)
         {
             try
