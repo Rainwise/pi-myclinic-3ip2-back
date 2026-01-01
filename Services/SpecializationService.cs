@@ -8,9 +8,9 @@ namespace myclinic_back.Services
     public class SpecializationService : ISpecializationService
     {
         private readonly PiProjectContext _context;
-        private readonly IAuditLogger _logger;
+        private readonly ICrudLogger _logger;
 
-        public SpecializationService(PiProjectContext context, IAuditLogger logger)
+        public SpecializationService(PiProjectContext context, ICrudLogger logger)
         {
             _context = context;
             _logger = logger;

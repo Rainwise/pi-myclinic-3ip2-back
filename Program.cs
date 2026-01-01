@@ -7,6 +7,7 @@ using myclinic_back.Interfaces;
 using myclinic_back.Models;
 using myclinic_back.Services;
 using myclinic_back.Utilities;
+using myclinic_back.Utilities.Service;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,8 +75,21 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<PiProjectContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
-builder.Services.AddSingleton<FileAuditObserver>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<AuditLogger>();
+builder.Services.AddSingleton<ICrudLogger>(sp =>
+{
+    var inner = sp.GetRequiredService<AuditLogger>();
+    var http = sp.GetRequiredService<IHttpContextAccessor>();
+    return new AdminLoggerDecorator(inner, http);
+});
+
+
+//builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
+builder.Services.AddSingleton<FileObserver>();
+builder.Services.AddSingleton<EmailService>();
+builder.Services.AddSingleton<EmailObserver>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<ISpecializationService, SpecializationService>();
@@ -85,8 +99,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-var audit = app.Services.GetRequiredService<IAuditLogger>();
-audit.Subscribe(app.Services.GetRequiredService<FileAuditObserver>());
+var logger = app.Services.GetRequiredService<ICrudLogger>();
+logger.Subscribe(app.Services.GetRequiredService<FileObserver>());
+logger.Subscribe(app.Services.GetRequiredService<EmailObserver>());
 
 if (app.Environment.IsDevelopment())
 {

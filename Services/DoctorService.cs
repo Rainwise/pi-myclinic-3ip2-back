@@ -11,8 +11,8 @@ namespace myclinic_back.Services
     public class DoctorService : IDoctorService
     {
         private readonly PiProjectContext _context;
-        private readonly IAuditLogger _logger;
-        public DoctorService(PiProjectContext context, IAuditLogger logger)
+        private readonly ICrudLogger _logger;
+        public DoctorService(PiProjectContext context, ICrudLogger logger)
         {
             _context = context;
             _logger = logger;
