@@ -41,7 +41,7 @@ namespace myclinic_back.Controllers
                     IdAccount = account.IdAccount,
                     FirstName = account.FirstName,
                     LastName = account.LastName,
-                    EmailAddres = account.EmailAddress,
+                    EmailAddress = account.EmailAddress,
                     Role = account.Role.Name,
                 };
 
@@ -84,7 +84,7 @@ namespace myclinic_back.Controllers
                         IdAccount = d.IdAccount,
                         FirstName = d.FirstName,
                         LastName = d.LastName,
-                        EmailAddres = d.EmailAddress,
+                        EmailAddress = d.EmailAddress,
                         Role = d.Role.Name,
                     };
 
@@ -125,7 +125,7 @@ namespace myclinic_back.Controllers
                         IdAccount = p.IdAccount,
                         FirstName = p.FirstName,
                         LastName = p.LastName,
-                        EmailAddres = p.EmailAddress,
+                        EmailAddress = p.EmailAddress,
                         Role = p.Role.Name,
                     };
 
@@ -163,7 +163,7 @@ namespace myclinic_back.Controllers
                         IdAccount = p.IdAccount,
                         FirstName = p.FirstName,
                         LastName = p.LastName,
-                        EmailAddres = p.EmailAddress,
+                        EmailAddress = p.EmailAddress,
                         Role = p.Role.Name,
                     };
 
@@ -190,6 +190,16 @@ namespace myclinic_back.Controllers
         {
             try
             {
+                var emailAddresses = _context.Accounts.Select(a => a.EmailAddress).ToList();
+
+                foreach (var e in emailAddresses)
+                {
+                    if(dto.EmailAddress == e)
+                    {
+                        return BadRequest($"Email Address {dto.EmailAddress} already exists in DB.");
+                    }
+                }
+
                 var b64salt = PasswordHashProvider.GetSalt();
                 var b64hash = PasswordHashProvider.GetHash(dto.Password, b64salt);
 
@@ -197,7 +207,7 @@ namespace myclinic_back.Controllers
                 {
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
-                    EmailAddress = dto.EmailAddres,
+                    EmailAddress = dto.EmailAddress,
                     PasswordSalt = b64salt,
                     PasswordHash = b64hash,
                     RoleId = dto.RoleId,
@@ -270,9 +280,22 @@ namespace myclinic_back.Controllers
                     return NotFound($"Account with idAccount {idAccount} was not found.");
                 }
 
+                if (!string.IsNullOrEmpty(dto.EmailAddress))
+                {
+                    var emailAddresses = _context.Accounts.Select(a => a.EmailAddress).ToList();
+
+                    foreach (var e in emailAddresses)
+                    {
+                        if (dto.EmailAddress == e)
+                        {
+                            return BadRequest($"Email Address {dto.EmailAddress} already exists in DB.");
+                        }
+                    }
+                }
+            
                 account.FirstName = string.IsNullOrWhiteSpace(dto.FirstName) ? account.FirstName : dto.FirstName;
                 account.LastName = string.IsNullOrWhiteSpace(dto.LastName) ? account.LastName : dto.LastName;
-                account.EmailAddress = string.IsNullOrWhiteSpace(dto.EmailAddres) ? account.EmailAddress : dto.EmailAddres;
+                account.EmailAddress = string.IsNullOrWhiteSpace(dto.EmailAddress) ? account.EmailAddress : dto.EmailAddress;
                 account.PasswordSalt = string.IsNullOrWhiteSpace(dto.Password) ? account.PasswordSalt : PasswordHashProvider.GetSalt();
                 account.PasswordHash = string.IsNullOrWhiteSpace(dto.Password) ? account.PasswordHash : PasswordHashProvider.GetHash(dto.Password, account.PasswordSalt);
 
@@ -380,11 +403,11 @@ namespace myclinic_back.Controllers
 
                 var account = _context.Accounts
                     .Include(a => a.Role)
-                    .FirstOrDefault(a => a.EmailAddress == dto.EmailAddres);
+                    .FirstOrDefault(a => a.EmailAddress == dto.EmailAddress);
 
                 if (account == null)
                 {
-                    return NotFound($"Account with email address {dto.EmailAddres} was not found.");
+                    return NotFound($"Account with email address {dto.EmailAddress} was not found.");
                 }
 
                 var b64hash = PasswordHashProvider.GetHash(dto.Password, account.PasswordSalt);

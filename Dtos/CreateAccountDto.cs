@@ -8,7 +8,7 @@
 
         public int? RoleId { get; set; }
 
-        public string EmailAddres { get; set; } = null!;
+        public string EmailAddress { get; set; } = null!;
 
         public string Password { get; set; } = null!;
 

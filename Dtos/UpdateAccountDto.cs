@@ -8,7 +8,7 @@
 
         public string Role { get; set; } = null!;
 
-        public string EmailAddres { get; set; } = null!;
+        public string EmailAddress { get; set; } = null!;
 
         public string Password { get; set; } = null!;
 
