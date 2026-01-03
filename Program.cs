@@ -71,22 +71,25 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<PiProjectContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<ILogEventPublisher, LogEventPublisher>();
+builder.Services.AddSingleton<LoggerService>();
 
-builder.Services.AddSingleton<AuditLogger>();
 builder.Services.AddSingleton<ICrudLogger>(sp =>
 {
-    var inner = sp.GetRequiredService<AuditLogger>();
+    var logger = sp.GetRequiredService<LoggerService>();
     var http = sp.GetRequiredService<IHttpContextAccessor>();
-    return new AdminLoggerDecorator(inner, http);
+    return new AdminLoggerDecorator(logger, http);
 });
 
 
 //builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
+
+//builder.Services.AddSingleton<ICrudLogger, LoggerService>();
 builder.Services.AddSingleton<FileObserver>();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddSingleton<EmailObserver>();
@@ -99,9 +102,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-var logger = app.Services.GetRequiredService<ICrudLogger>();
-logger.Subscribe(app.Services.GetRequiredService<FileObserver>());
-logger.Subscribe(app.Services.GetRequiredService<EmailObserver>());
+var publisher = app.Services.GetRequiredService<ILogEventPublisher>();
+publisher.Subscribe(app.Services.GetRequiredService<FileObserver>());
+publisher.Subscribe(app.Services.GetRequiredService<EmailObserver>());
 
 if (app.Environment.IsDevelopment())
 {
